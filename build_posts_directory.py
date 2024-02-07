@@ -4,7 +4,7 @@ import re
 from xml.etree import ElementTree
 
 BASE_URL = 'https://wajib.getbisexual.com'
-PAGE_DIRECTORY = ''
+PAGE_DIRECTORY = os.path.join(os.path.dirname(os.getcwd()),'personal-page')
 
 def wrap(tag, contents, attributes=None):
     attribute_string = ''.join(f' {key}="{attributes[key]}"' for key in attributes) if attributes else ''
@@ -60,7 +60,7 @@ def generatePost(filename,filepath):
     ], {'lang': 'en-US'})
     filename_without_ext = re.sub(r'\.xml$','',filename)
     if published:
-        outfilepath = os.path.join(os.path.dirname(os.getcwd()),'personal-page','posts',filename_without_ext,'index.html')
+        outfilepath = os.path.join(PAGE_DIRECTORY,'posts',filename_without_ext,'index.html')
         clean_and_write(document,outfilepath,'webpage')
     return {
         'title': title,
@@ -123,8 +123,8 @@ for file in os.listdir('posts'):
         filepath = os.path.join(os.getcwd(),'posts',filename)
         items.append(generatePost(filename, filepath))
 rss_string = generateRSS(items)
-rss_path = os.path.join(os.path.dirname(os.getcwd()),'personal-page','rss.xml')
+rss_path = os.path.join(PAGE_DIRECTORY,'rss.xml')
 clean_and_write(rss_string,rss_path,'rss')
 index_string = generateIndex(items)
-index_path = os.path.join(os.path.dirname(os.getcwd()),'personal-page','posts','index.html')
+index_path = os.path.join(PAGE_DIRECTORY,'posts','index.html')
 clean_and_write(index_string,index_path,'webpage')
