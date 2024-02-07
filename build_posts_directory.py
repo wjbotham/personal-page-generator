@@ -54,14 +54,17 @@ def generatePost(filename,filepath):
         elif child.tag == 'published':
             if child.text == 'true':
                 published = True
-    document = wrap('html',[
-        headerElement(title),
-        bodyElement(title, description, content)
-    ], {'lang': 'en-US'})
     filename_without_ext = re.sub(r'\.xml$','',filename)
     if published:
         outfilepath = os.path.join(PAGE_DIRECTORY,'posts',filename_without_ext,'index.html')
-        clean_and_write(document,outfilepath,'webpage')
+        clean_and_write(
+            wrap('html',[
+                headerElement(title),
+                bodyElement(title, description, content)
+            ], {'lang': 'en-US'}),
+            os.path.join(PAGE_DIRECTORY,'posts',filename_without_ext,'index.html'),
+            'webpage'
+        )
     return {
         'title': title,
         'description': description,
@@ -122,9 +125,13 @@ for file in os.listdir('posts'):
     if filename.endswith('.xml'):
         filepath = os.path.join(os.getcwd(),'posts',filename)
         items.append(generatePost(filename, filepath))
-rss_string = generateRSS(items)
-rss_path = os.path.join(PAGE_DIRECTORY,'rss.xml')
-clean_and_write(rss_string,rss_path,'rss')
-index_string = generateIndex(items)
-index_path = os.path.join(PAGE_DIRECTORY,'posts','index.html')
-clean_and_write(index_string,index_path,'webpage')
+clean_and_write(
+    generateRSS(items),
+    os.path.join(PAGE_DIRECTORY,'rss.xml'),
+    'rss'
+)
+clean_and_write(
+    generateIndex(items),
+    os.path.join(PAGE_DIRECTORY,'posts','index.html'),
+    'webpage'
+)
