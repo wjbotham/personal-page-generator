@@ -56,7 +56,10 @@ def generatePost(filename,filepath):
                 published = True
     filename_without_ext = re.sub(r'\.xml$','',filename)
     if published:
-        outfilepath = os.path.join(PAGE_DIRECTORY,'posts',filename_without_ext,'index.html')
+        post_directory = os.path.join(PAGE_DIRECTORY,'posts',filename_without_ext)
+        outfilepath = os.path.join(post_directory,'index.html')
+        if not os.path.isdir(post_directory):
+            os.mkdir(post_directory)
         clean_and_write(
             wrap('html',[
                 headerElement(title),
