@@ -3,7 +3,7 @@ import io
 import re
 from xml.etree import ElementTree
 
-BASE_URL = 'https://wajib.getbisexual.com'
+BASE_URL = 'https://wajib.space'
 PAGE_DIRECTORY = os.path.join(os.path.dirname(os.getcwd()),'personal-page')
 
 def wrap(tag, contents, attributes=None):
