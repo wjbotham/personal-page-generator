@@ -5,6 +5,8 @@ from xml.etree import ElementTree
 
 BASE_URL = 'https://wajib.space'
 PAGE_DIRECTORY = os.path.join(os.path.dirname(os.getcwd()),'personal-page')
+with open(os.path.join(os.getcwd(), 'navigation-bar.html'), 'r') as file:
+    NAV_CONTENTS = file.read()
 
 def wrap(tag, contents, attributes=None):
     attribute_string = ''.join(f' {key}="{attributes[key]}"' for key in attributes) if attributes else ''
@@ -25,10 +27,9 @@ def headerElement(title = None):
 
 def bodyElement(title: str, description: str, content: str):
     return wrap('body', [
-	'<nav></nav>',
-        '<script>',
-        '$(function() { $("nav").load("/navigation-bar.html"); });',
-	'</script>',
+	'<nav>',
+        NAV_CONTENTS,
+        '</nav>',
 	mainElement(title, description, content)
     ])
 
