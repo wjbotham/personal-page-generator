@@ -2,6 +2,8 @@ import os
 import io
 import re
 from xml.etree import ElementTree
+from datetime import date
+from operator import itemgetter
 
 BASE_URL = 'https://wajib.space'
 PAGE_DIRECTORY = os.path.join(os.path.dirname(os.getcwd()),'personal-page')
@@ -55,6 +57,12 @@ def generatePost(filename,filepath):
         elif child.tag == 'published':
             if child.text == 'true':
                 published = True
+        elif child.tag == 'created_at':
+            year,month,day = map(int,child.text.split('-'))
+            created_at = date(year,month,day)
+        elif child.tag == 'updated_at':
+            year,month,day = map(int,child.text.split('-'))
+            updated_at = date(year,month,day)
     filename_without_ext = re.sub(r'\.xml$','',filename)
     if published:
         post_directory = os.path.join(PAGE_DIRECTORY,'posts',filename_without_ext)
@@ -74,7 +82,9 @@ def generatePost(filename,filepath):
         'description': description,
         'link': f'{BASE_URL}/posts/{filename_without_ext}',
         'published': published,
-        'pagename': filename_without_ext
+        'pagename': filename_without_ext,
+        'created_at': created_at,
+        'updated_at': updated_at
     }
 
 def generateRSS(items):
@@ -109,7 +119,7 @@ def generateIndex(items):
             wrap('li',[
                 wrap('a', [item['title']], {'href': item['pagename']}),
                 (' - ' + item['description']) if item['description'] else ''
-            ]) for item in items if item['published']
+            ]) for item in sorted(items,key=itemgetter('created_at'),reverse=True) if item['published']
         ]))
     ], {'lang': 'en-US'})
 
