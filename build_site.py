@@ -14,7 +14,7 @@ def wrap(tag, contents, attributes=None):
     attribute_string = ''.join(f' {key}="{attributes[key]}"' for key in attributes) if attributes else ''
     return ''.join([
         '<%s%s>' % (tag,attribute_string),
-        ''.join(contents),
+        ''.join(filter(lambda x: x != None, contents)),
         '</%s>' % tag
     ])
 
