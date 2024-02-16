@@ -4,6 +4,7 @@ import re
 from xml.etree import ElementTree
 from datetime import date
 from operator import itemgetter
+import shutil
 
 BASE_URL = 'https://wajib.space'
 PAGE_DIRECTORY = os.path.join(os.path.dirname(os.getcwd()),'personal-page')
@@ -148,4 +149,8 @@ clean_and_write(
     generateIndex(items),
     os.path.join(PAGE_DIRECTORY,'posts','index.html'),
     'webpage'
+)
+shutil.copy(
+    os.path.join(os.getcwd(), 'default.css'),
+    os.path.join(PAGE_DIRECTORY, 'default.css')
 )
