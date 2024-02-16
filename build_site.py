@@ -1,3 +1,7 @@
+# run resulting page locally with:
+#   cd .\Projects\personal-page\
+#   python -m http.server 8000
+
 import os
 import io
 import re
