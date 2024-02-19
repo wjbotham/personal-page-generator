@@ -122,14 +122,12 @@ def generateIndex(items):
         headerElement(),
         bodyElement('', 'This is where I put my finest posts.', wrap('ul',[
             wrap('li',[
-                wrap('a', [item['title']], {'href': item['pagename']}),
-                (' - ' + item['description']) if item['description'] else '',
-                ' ',
                 wrap('span', [
-                    '(updated ',
                     item['updated_at'].strftime('%b %d, %Y'),
-                    ')'
-                ], {'class': 'post_metadata'})
+                ], {'class': 'post_metadata'}),
+                ' ',
+                wrap('a', [item['title']], {'href': item['pagename']}),
+                (' - ' + item['description']) if item['description'] else ''
             ]) for item in sorted(items,key=itemgetter('created_at'),reverse=True) if item['published']
         ]))
     ], {'lang': 'en-US'})
