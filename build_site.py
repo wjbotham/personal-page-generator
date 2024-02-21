@@ -32,19 +32,26 @@ def headerElement(title = None):
         f'<title>Wesley\'s Home Page{" - "+title if title else ""}</title>'
     ])
 
-def bodyElement(title: str, description: str, content: str):
+def bodyElement(title: str, content: str, created_at = None, updated_at = None):
     return wrap('body', [
 	'<nav>',
         NAV_CONTENTS,
         '</nav>',
-	mainElement(title, description, content)
+	mainElement(title, content, created_at, updated_at)
     ])
 
-def mainElement(title: str, description: str, content: str):
+def mainElement(title: str, content: str, created_at = None, updated_at = None):
     return wrap('main', [
 	('<h2>%s</h2>' % title) if title else '',
-        ('<p>%s</p>' % description) if description else '',
-        content
+        content,
+        wrap('span', [
+            'published ',
+            created_at.strftime('%b %d %Y')
+        ], {'class': 'post_metadata'}) if created_at else '',
+        '<br/>'+wrap('span', [
+            'updated ',
+            updated_at.strftime('%b %d %Y'),
+        ], {'class': 'post_metadata'}) if (updated_at and created_at != updated_at) else ''
     ])
 
 def generatePost(filename,filepath):
@@ -77,7 +84,7 @@ def generatePost(filename,filepath):
         clean_and_write(
             wrap('html',[
                 headerElement(title),
-                bodyElement(title, description, content)
+                bodyElement(title, content, created_at, updated_at)
             ], {'lang': 'en-US'}),
             os.path.join(PAGE_DIRECTORY,'posts',filename_without_ext,'index.html'),
             'webpage'
@@ -108,7 +115,7 @@ def generateRSS(items):
         wrap('item',[
             wrap('title', [item['title']]),
             wrap('link', [item['link']]),
-            wrap('description', [item['description']]) if item['description'] else '',
+            wrap('description', [item['description']]),
             wrap('guid', [item['link']])
         ]) for item in items if item['published']
     ])
@@ -120,15 +127,19 @@ def generateRSS(items):
 def generateIndex(items):
     return wrap('html',[
         headerElement(),
-        bodyElement('', 'This is where I put my finest posts.', wrap('ul',[
-            wrap('li',[
-                wrap('span', [
-                    item['updated_at'].strftime('%b %d, %Y'),
-                ], {'class': 'post_metadata'}),
-                ' ',
-                wrap('a', [item['title']], {'href': item['pagename']}),
-                (' - ' + item['description']) if item['description'] else ''
-            ]) for item in sorted(items,key=itemgetter('created_at'),reverse=True) if item['published']
+        bodyElement('',
+            wrap('p','This is where I put my finest posts.')+
+            wrap('ul',[
+                wrap('li',[
+                    wrap('a', [item['title']], {'href': item['pagename']}),
+                    (' - ' + item['description']),
+                    ' ',
+                    wrap('span', [
+                        'published ',
+                        item['created_at'].strftime('%b %d %Y'),
+                        ', updated '+item['updated_at'].strftime('%b %d %Y') if item['created_at'] != item['updated_at'] else ''
+                    ], {'class': 'post_metadata'})
+                ]) for item in sorted(items,key=itemgetter('created_at'),reverse=True) if item['published']
         ]))
     ], {'lang': 'en-US'})
 

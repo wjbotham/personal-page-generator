@@ -32,6 +32,7 @@ img {
 }
 
 .post_metadata {
-    font-size: 10px;
+    font-size: 11px;
     font-style: italic;
+	color: #744497;
 }
