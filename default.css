@@ -36,3 +36,13 @@ img {
     font-style: italic;
 	color: #744497;
 }
+
+spoiler {
+  background-color: purple;
+  color: transparent;
+}
+
+spoiler:hover {
+  background-color: var(--bg-color-dark);
+  color: inherit;
+}
