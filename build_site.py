@@ -55,7 +55,11 @@ def mainElement(title: str, content: str, created_at = None, updated_at = None):
     ])
 
 def generatePost(filename,filepath):
-    source = ElementTree.parse(filepath)
+    try:
+        source = ElementTree.parse(filepath)
+    except ElementTree.ParseError as err:
+        print(f'parse error in {filename}: {err}')
+        return None
     published = False
     for child in source.getroot():
         if child.tag == 'title':
@@ -158,7 +162,9 @@ for file in os.listdir('posts'):
     filename = os.fsdecode(file)
     if filename.endswith('.xml'):
         filepath = os.path.join(os.getcwd(),'posts',filename)
-        items.append(generatePost(filename, filepath))
+        item = generatePost(filename, filepath)
+        if item:
+            items.append(item)
 clean_and_write(
     generateRSS(items),
     os.path.join(PAGE_DIRECTORY,'rss.xml'),
