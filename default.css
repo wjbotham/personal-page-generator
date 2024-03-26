@@ -46,3 +46,11 @@ spoiler:hover {
   background-color: var(--bg-color-dark);
   color: inherit;
 }
+
+section.list > :first-child {
+  margin-bottom: 5px;
+}
+
+section.list > ul,ol {
+  margin-top: 5px;
+}
