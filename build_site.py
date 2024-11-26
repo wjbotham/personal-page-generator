@@ -79,6 +79,11 @@ def generatePost(filename,filepath):
         elif child.tag == 'updated_at':
             year,month,day = map(int,child.text.split('-'))
             updated_at = date(year,month,day)
+        elif child.tag == 'tags':
+            tag_names = []
+            for subchild in child:
+                if subchild.tag == 'tag':
+                    tag_names += [subchild.text]
     filename_without_ext = re.sub(r'\.xml$','',filename)
     if published:
         post_directory = os.path.join(PAGE_DIRECTORY,'posts',filename_without_ext)
@@ -100,7 +105,8 @@ def generatePost(filename,filepath):
         'published': published,
         'pagename': filename_without_ext,
         'created_at': created_at,
-        'updated_at': updated_at
+        'updated_at': updated_at,
+        'tags': tag_names
     }
 
 def generateRSS(items):
@@ -128,7 +134,7 @@ def generateRSS(items):
         'xmlns:atom': 'http://www.w3.org/2005/Atom'
     })
 
-def generateIndex(items):
+def generateIndex(items, tags):
     return wrap('html',[
         headerElement(),
         bodyElement('',
@@ -158,6 +164,7 @@ def clean_and_write(xml_string: str, path: str, kind: str):
         tree.write(path, method='html')
 
 items = []
+tags = []
 for file in os.listdir('posts'):
     filename = os.fsdecode(file)
     if filename.endswith('.xml'):
@@ -165,13 +172,15 @@ for file in os.listdir('posts'):
         item = generatePost(filename, filepath)
         if item:
             items.append(item)
+        tags = tags + item['tags']
+tags = sorted(set(tags))
 clean_and_write(
     generateRSS(items),
     os.path.join(PAGE_DIRECTORY,'rss.xml'),
     'rss'
 )
 clean_and_write(
-    generateIndex(items),
+    generateIndex(items, tags),
     os.path.join(PAGE_DIRECTORY,'posts','index.html'),
     'webpage'
 )
