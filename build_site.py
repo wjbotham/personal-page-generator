@@ -34,7 +34,7 @@ def headerElement(title = None):
 
 def bodyElement(title: str, content: str, created_at = None, updated_at = None):
     return wrap('body', [
-	'<nav>',
+        '<nav>',
         NAV_CONTENTS,
         '</nav>',
 	mainElement(title, content, created_at, updated_at)
