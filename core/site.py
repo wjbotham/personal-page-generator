@@ -93,7 +93,7 @@ class Site:
             "channel",
             [
                 "<title>Wesley's Home Page</title>",
-                f'<link>{self.base_url}</link>',
+                f"<link>{self.base_url}</link>",
                 "<description>My personal page where I post things I don't want anyone to see.</description>",
                 "<language>en-US</language>",
                 "<docs>https://www.rssboard.org/rss-specification</docs>",
@@ -101,7 +101,7 @@ class Site:
                     "atom:link",
                     [],
                     {
-                        "href": f'{self.base_url}/rss.xml',
+                        "href": f"{self.base_url}/rss.xml",
                         "rel": "self",
                         "type": "application/rss+xml",
                     },
@@ -112,9 +112,9 @@ class Site:
                     "item",
                     [
                         wrap("title", post.title),
-                        wrap("link", f'{self.base_url}/posts/{post.pagename}'),
+                        wrap("link", f"{self.base_url}/posts/{post.pagename}"),
                         wrap("description", post.description),
-                        wrap("guid", f'{self.base_url}/posts/{post.pagename}'),
+                        wrap("guid", f"{self.base_url}/posts/{post.pagename}"),
                     ],
                 )
                 for post in self.posts
