@@ -139,7 +139,7 @@ def generatePrimaryIndex(items, tags):
         headerElement(),
         bodyElement('',
             wrap('p','')+
-            wrap('center',[wrap('a', tag, {'href': f'../tags/{tag}.html'}) for tag in tags])+
+            wrap('center',[wrap('a', tag, {'href': f'../tags/{tag}'}) for tag in tags])+
             wrap('ul',[
                 wrap('li',[
                     wrap('a', item['title'], {'href': item['pagename']}),
@@ -161,7 +161,7 @@ def generateTagIndex(items, tags, selected_tag):
         bodyElement('',
             wrap('p','')+
             wrap('center',[
-                (wrap('b',tag) if tag == selected_tag else wrap('a', tag, {'href': f'../tags/{tag}.html'})) for tag in tags
+                (wrap('b',tag) if tag == selected_tag else wrap('a', tag, {'href': f'../{tag}'})) for tag in tags
             ])+
             wrap('ul',[
                 wrap('li',[
@@ -211,9 +211,12 @@ clean_and_write(
     'webpage'
 )
 for tag in tags:
+    tag_directory = os.path.join(PAGE_DIRECTORY,'tags',tag)
+    if not os.path.isdir(tag_directory):
+        os.mkdir(tag_directory)
     clean_and_write(
         generateTagIndex(items, tags, tag),
-        os.path.join(PAGE_DIRECTORY,'tags',f'{tag}.html'),
+        os.path.join(tag_directory,'index.html'),
         'webpage'
     )
 shutil.copy(
