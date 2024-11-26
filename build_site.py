@@ -165,7 +165,7 @@ def generateTagIndex(items, tags, selected_tag):
             ])+
             wrap('ul',[
                 wrap('li',[
-                    wrap('a', item['title'], {'href': item['pagename']}),
+                    wrap('a', item['title'], {'href': f'../posts/{item['pagename']}'}),
                     (' - ' + item['description']),
                     ' ',
                     wrap('span', [
