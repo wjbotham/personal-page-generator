@@ -2,7 +2,6 @@ from core.post import Post
 import os
 import io
 from xml.etree import ElementTree
-from operator import itemgetter
 import shutil
 
 def clean_and_write(xml_string: str, path: str, kind: str):
@@ -19,7 +18,7 @@ def wrap(tag, contents, attributes=None):
     attribute_string = ''.join(f' {key}="{attributes[key]}"' for key in attributes) if attributes else ''
     return ''.join([
         '<%s%s>' % (tag,attribute_string),
-        ''.join(filter(lambda x: x != None, contents)),
+        ''.join(filter(lambda x: x is not None, contents)),
         '</%s>' % tag
     ])
     
@@ -56,17 +55,16 @@ class Site:
         with open(os.path.join(self.config['source_directory'], 'navigation-bar.html'), 'r') as file:
             self.nav_contents = file.read()
         
-        posts = []
-        tags = []
+        self.posts = []
         for file in os.listdir(os.path.join(self.config['source_directory'],'posts')):
             filename = os.fsdecode(file)
             if filename.endswith('.xml'):
                 filepath = os.path.join(self.config['source_directory'],'posts',filename)
                 post = Post(filename, filepath)
                 if post and post.published:
-                    posts.append(post)
-        self.posts = posts
-        self.tags = sorted(set([tag for tag_list in map(lambda post: post.tags, posts) for tag in tag_list]))
+                    self.posts.append(post)
+
+        self.tags = sorted(set([tag for tag_list in map(lambda post: post.tags, self.posts) for tag in tag_list]))
     
     def rss(self):
         channel_tag = wrap('channel', [
