@@ -1,6 +1,7 @@
 from xml.etree import ElementTree
 import io
 
+
 def wrap(tag, contents, attributes=None):
     attribute_string = "".join(f' {key}="{attributes[key]}"' for key in attributes) if attributes else ""
     return "".join(
@@ -10,6 +11,7 @@ def wrap(tag, contents, attributes=None):
             "</%s>" % tag,
         ]
     )
+
 
 def write(xml_string: str, path: str, kind: str):
     assert kind == "rss" or kind == "webpage"

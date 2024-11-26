@@ -1,6 +1,6 @@
 from xml.etree import ElementTree
 from datetime import date
-from modules.helpers import wrap,write
+from modules.helpers import wrap
 import re
 
 

@@ -4,7 +4,6 @@ from modules.helpers import wrap, write
 import shutil
 
 
-
 def headerElement(title=None):
     return wrap(
         "head",
@@ -102,31 +101,22 @@ class Site:
             [
                 headerElement(selected_tag or "Posts"),
                 self.bodyElement(
-                    "",
-                    wrap("p", "")
-                    + wrap(
-                        "center",
-                        [(wrap("b", tag) if tag == selected_tag else wrap("a", tag, {"href": f"/tags/{tag}"})) for tag in self.tags],
+                    mainElement(
+                        "",
+                        wrap("p", "")
+                        + wrap("center", [(wrap("b", tag) if tag == selected_tag else wrap("a", tag, {"href": f"/tags/{tag}"})) for tag in self.tags])
+                        + wrap(
+                            "ul",
+                            [post.list_item() for post in reversed(self.posts) if post.published and (selected_tag in post.tags or not selected_tag)],
+                        ),
                     )
-                    + wrap(
-                        "ul",
-                        [post.list_item() for post in reversed(self.posts) if post.published and (selected_tag in post.tags or not selected_tag)],
-                    ),
                 ),
             ],
             {"lang": "en-US"},
         )
 
-    def bodyElement(self, title: str, content: str, created_at=None, updated_at=None):
-        return wrap(
-            "body",
-            [
-                "<nav>",
-                self.nav_contents,
-                "</nav>",
-                mainElement(title, content, created_at, updated_at),
-            ],
-        )
+    def bodyElement(self, content: str):
+        return wrap("body", [wrap("nav", self.nav_contents), content])
 
     def generate_static_files(self):
         write(
@@ -146,17 +136,17 @@ class Site:
             write(tag_index, os.path.join(tag_directory, "index.html"), "webpage")
         for post in self.posts:
             if post.published:
-                post_directory = os.path.join(self.static_site_directory,'posts',post.pagename)
-                outfilepath = os.path.join(post_directory,'index.html')
+                post_directory = os.path.join(self.static_site_directory, "posts", post.pagename)
                 if not os.path.isdir(post_directory):
                     os.mkdir(post_directory)
                 write(
-                    wrap('html',[
-                        headerElement(post.title),
-                        self.bodyElement(post.title, post.content, post.created_at, post.updated_at)
-                    ], {'lang': 'en-US'}),
-                    os.path.join(post_directory,'index.html'),
-                    'webpage'
+                    wrap(
+                        "html",
+                        [headerElement(post.title), self.bodyElement(mainElement(post.title, post.content, post.created_at, post.updated_at))],
+                        {"lang": "en-US"},
+                    ),
+                    os.path.join(post_directory, "index.html"),
+                    "webpage",
                 )
         shutil.copy(
             os.path.join(self.source_directory, "default.css"),
