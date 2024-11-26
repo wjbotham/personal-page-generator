@@ -1,7 +1,20 @@
 from core.post import Post
 import os
+import io
+from xml.etree import ElementTree
 from operator import itemgetter
-    
+import shutil
+
+def clean_and_write(xml_string: str, path: str, kind: str):
+    assert(kind == 'rss' or kind == 'webpage')
+    tree = ElementTree.parse(io.StringIO(xml_string))
+    ElementTree.indent(tree.getroot())
+    if kind == 'rss':
+        ElementTree.register_namespace('atom','http://www.w3.org/2005/Atom')
+        tree.write(path, method='xml')
+    elif kind == 'webpage':
+        tree.write(path, method='html')
+        
 def wrap(tag, contents, attributes=None):
     attribute_string = ''.join(f' {key}="{attributes[key]}"' for key in attributes) if attributes else ''
     return ''.join([
@@ -134,3 +147,28 @@ class Site:
             '</nav>',
             mainElement(title, content, created_at, updated_at)
         ])
+        
+    def generate_static_files(self):
+        clean_and_write(
+            self.rss(),
+            os.path.join(self.config['static_site_directory'],'rss.xml'),
+            'rss'
+        )
+        clean_and_write(
+            self.primaryIndex(),
+            os.path.join(self.config['static_site_directory'],'posts','index.html'),
+            'webpage'
+        )
+        for tag_name,tag_index in self.tagIndexes().items():
+            tag_directory = os.path.join(self.config['static_site_directory'],'tags',tag_name)
+            if not os.path.isdir(tag_directory):
+                os.mkdir(tag_directory)
+            clean_and_write(
+                tag_index,
+                os.path.join(tag_directory,'index.html'),
+                'webpage'
+            )
+        shutil.copy(
+            os.path.join(self.config['source_directory'], 'default.css'),
+            os.path.join(self.config['static_site_directory'], 'default.css')
+        )
