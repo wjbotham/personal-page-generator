@@ -5,10 +5,9 @@
 from core.site import Site
 import os
 import io
+import yaml
 from xml.etree import ElementTree
 import shutil
-
-PAGE_DIRECTORY = os.path.join(os.path.dirname(os.getcwd()),'personal-page')
 
 def clean_and_write(xml_string: str, path: str, kind: str):
     assert(kind == 'rss' or kind == 'webpage')
@@ -19,24 +18,23 @@ def clean_and_write(xml_string: str, path: str, kind: str):
         tree.write(path, method='xml')
     elif kind == 'webpage':
         tree.write(path, method='html')
-        
-site = Site({
-    'base_url': 'https://wajib.space',
-    'post_xml_directory': 'posts',
-    'static_site_directory': os.path.join(os.path.dirname(os.getcwd()),'personal-page')
-})
+
+with open('config.yaml', 'r') as stream:
+    config = yaml.safe_load(stream)
+site = Site(config)
+
 clean_and_write(
     site.rss(),
-    os.path.join(PAGE_DIRECTORY,'rss.xml'),
+    os.path.join(config['static_site_directory'],'rss.xml'),
     'rss'
 )
 clean_and_write(
     site.primaryIndex(),
-    os.path.join(PAGE_DIRECTORY,'posts','index.html'),
+    os.path.join(config['static_site_directory'],'posts','index.html'),
     'webpage'
 )
 for tag_name,tag_index in site.tagIndexes().items():
-    tag_directory = os.path.join(PAGE_DIRECTORY,'tags',tag_name)
+    tag_directory = os.path.join(config['static_site_directory'],'tags',tag_name)
     if not os.path.isdir(tag_directory):
         os.mkdir(tag_directory)
     clean_and_write(
@@ -46,5 +44,5 @@ for tag_name,tag_index in site.tagIndexes().items():
     )
 shutil.copy(
     os.path.join(os.getcwd(), 'default.css'),
-    os.path.join(PAGE_DIRECTORY, 'default.css')
+    os.path.join(config['static_site_directory'], 'default.css')
 )
