@@ -75,7 +75,7 @@ class Site:
                 post = Post(filename, filepath)
                 if post and post.published:
                     self.posts.append(post)
-
+        self.posts.sort(key=lambda post: post.created_at)
         self.tags = sorted(set([tag for tag_list in [post.tags for post in self.posts] for tag in tag_list]))
 
     def rss(self):
@@ -97,7 +97,7 @@ class Site:
                     },
                 ),
             ]
-            + [post.rss_item(f"{self.base_url}/posts") for post in self.posts if post.published],
+            + [post.rss_item(self.base_url) for post in self.posts if post.published],
         )
         return wrap(
             "rss",
@@ -122,35 +122,7 @@ class Site:
                     )
                     + wrap(
                         "ul",
-                        [
-                            wrap(
-                                "li",
-                                [
-                                    wrap(
-                                        "a",
-                                        post.title,
-                                        {"href": f"/posts/{post.pagename}"},
-                                    ),
-                                    (" - " + post.description),
-                                    " ",
-                                    wrap(
-                                        "span",
-                                        [
-                                            "published ",
-                                            post.created_at.strftime("%b %d %Y"),
-                                            ", updated " + post.updated_at.strftime("%b %d %Y") if post.created_at != post.updated_at else "",
-                                        ],
-                                        {"class": "post_metadata"},
-                                    ),
-                                ],
-                            )
-                            for post in sorted(
-                                self.posts,
-                                key=lambda post: post.created_at,
-                                reverse=True,
-                            )
-                            if post.published and (selected_tag in post.tags or not selected_tag)
-                        ],
+                        [post.list_item() for post in reversed(self.posts) if post.published and (selected_tag in post.tags or not selected_tag)],
                     ),
                 ),
             ],

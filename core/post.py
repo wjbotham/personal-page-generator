@@ -48,8 +48,27 @@ class Post:
             "item",
             [
                 wrap("title", self.title),
-                wrap("link", f"{link_root}/{self.pagename}"),
+                wrap("link", f"{link_root}/posts/{self.pagename}"),
                 wrap("description", self.description),
-                wrap("guid", f"{link_root}/{self.pagename}"),
+                wrap("guid", f"{link_root}/posts/{self.pagename}"),
+            ],
+        )
+
+    def list_item(self):
+        return wrap(
+            "li",
+            [
+                wrap("a", self.title, {"href": f"/posts/{self.pagename}"}),
+                (" - " + self.description),
+                " ",
+                wrap(
+                    "span",
+                    [
+                        "published ",
+                        self.created_at.strftime("%b %d %Y"),
+                        ", updated " + self.updated_at.strftime("%b %d %Y") if self.created_at != self.updated_at else "",
+                    ],
+                    {"class": "post_metadata"},
+                ),
             ],
         )
