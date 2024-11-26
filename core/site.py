@@ -17,11 +17,7 @@ def clean_and_write(xml_string: str, path: str, kind: str):
 
 
 def wrap(tag, contents, attributes=None):
-    attribute_string = (
-        "".join(f' {key}="{attributes[key]}"' for key in attributes)
-        if attributes
-        else ""
-    )
+    attribute_string = "".join(f' {key}="{attributes[key]}"' for key in attributes) if attributes else ""
     return "".join(
         [
             "<%s%s>" % (tag, attribute_string),
@@ -74,43 +70,30 @@ def mainElement(title: str, content: str, created_at=None, updated_at=None):
 
 class Site:
     def __init__(self, config):
-        self.config = {}
-        self.config["source_directory"] = config["source_directory"]
-        self.config["static_site_directory"] = config["static_site_directory"]
-        self.config["base_url"] = config["base_url"]
+        self.source_directory = config["source_directory"]
+        self.static_site_directory = config["static_site_directory"]
+        self.base_url = config["base_url"]
 
-        with open(
-            os.path.join(self.config["source_directory"], "navigation-bar.html"), "r"
-        ) as file:
+        with open(os.path.join(self.source_directory, "navigation-bar.html"), "r") as file:
             self.nav_contents = file.read()
 
         self.posts = []
-        for file in os.listdir(os.path.join(self.config["source_directory"], "posts")):
+        for file in os.listdir(os.path.join(self.source_directory, "posts")):
             filename = os.fsdecode(file)
             if filename.endswith(".xml"):
-                filepath = os.path.join(
-                    self.config["source_directory"], "posts", filename
-                )
+                filepath = os.path.join(self.source_directory, "posts", filename)
                 post = Post(filename, filepath)
                 if post and post.published:
                     self.posts.append(post)
 
-        self.tags = sorted(
-            set(
-                [
-                    tag
-                    for tag_list in map(lambda post: post.tags, self.posts)
-                    for tag in tag_list
-                ]
-            )
-        )
+        self.tags = sorted(set([tag for tag_list in map(lambda post: post.tags, self.posts) for tag in tag_list]))
 
     def rss(self):
         channel_tag = wrap(
             "channel",
             [
                 "<title>Wesley's Home Page</title>",
-                f'<link>{self.config['base_url']}</link>',
+                f'<link>{self.base_url}</link>',
                 "<description>My personal page where I post things I don't want anyone to see.</description>",
                 "<language>en-US</language>",
                 "<docs>https://www.rssboard.org/rss-specification</docs>",
@@ -118,7 +101,7 @@ class Site:
                     "atom:link",
                     [],
                     {
-                        "href": f'{self.config['base_url']}/rss.xml',
+                        "href": f'{self.base_url}/rss.xml',
                         "rel": "self",
                         "type": "application/rss+xml",
                     },
@@ -129,13 +112,9 @@ class Site:
                     "item",
                     [
                         wrap("title", post.title),
-                        wrap(
-                            "link", f'{self.config['base_url']}/posts/{post.pagename}'
-                        ),
+                        wrap("link", f'{self.base_url}/posts/{post.pagename}'),
                         wrap("description", post.description),
-                        wrap(
-                            "guid", f'{self.config['base_url']}/posts/{post.pagename}'
-                        ),
+                        wrap("guid", f'{self.base_url}/posts/{post.pagename}'),
                     ],
                 )
                 for post in self.posts
@@ -161,14 +140,7 @@ class Site:
                     wrap("p", "")
                     + wrap(
                         "center",
-                        [
-                            (
-                                wrap("b", tag)
-                                if tag == selected_tag
-                                else wrap("a", tag, {"href": f"/tags/{tag}"})
-                            )
-                            for tag in self.tags
-                        ],
+                        [(wrap("b", tag) if tag == selected_tag else wrap("a", tag, {"href": f"/tags/{tag}"})) for tag in self.tags],
                     )
                     + wrap(
                         "ul",
@@ -188,10 +160,7 @@ class Site:
                                         [
                                             "published ",
                                             post.created_at.strftime("%b %d %Y"),
-                                            ", updated "
-                                            + post.updated_at.strftime("%b %d %Y")
-                                            if post.created_at != post.updated_at
-                                            else "",
+                                            ", updated " + post.updated_at.strftime("%b %d %Y") if post.created_at != post.updated_at else "",
                                         ],
                                         {"class": "post_metadata"},
                                     ),
@@ -202,8 +171,7 @@ class Site:
                                 key=lambda post: post.created_at,
                                 reverse=True,
                             )
-                            if post.published
-                            and (selected_tag in post.tags or not selected_tag)
+                            if post.published and (selected_tag in post.tags or not selected_tag)
                         ],
                     ),
                 ),
@@ -225,24 +193,20 @@ class Site:
     def generate_static_files(self):
         clean_and_write(
             self.rss(),
-            os.path.join(self.config["static_site_directory"], "rss.xml"),
+            os.path.join(self.static_site_directory, "rss.xml"),
             "rss",
         )
         clean_and_write(
             self.index(),
-            os.path.join(self.config["static_site_directory"], "posts", "index.html"),
+            os.path.join(self.static_site_directory, "posts", "index.html"),
             "webpage",
         )
         for tag_name, tag_index in self.tagIndexes().items():
-            tag_directory = os.path.join(
-                self.config["static_site_directory"], "tags", tag_name
-            )
+            tag_directory = os.path.join(self.static_site_directory, "tags", tag_name)
             if not os.path.isdir(tag_directory):
                 os.mkdir(tag_directory)
-            clean_and_write(
-                tag_index, os.path.join(tag_directory, "index.html"), "webpage"
-            )
+            clean_and_write(tag_index, os.path.join(tag_directory, "index.html"), "webpage")
         shutil.copy(
-            os.path.join(self.config["source_directory"], "default.css"),
-            os.path.join(self.config["static_site_directory"], "default.css"),
+            os.path.join(self.source_directory, "default.css"),
+            os.path.join(self.static_site_directory, "default.css"),
         )
