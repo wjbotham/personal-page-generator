@@ -134,14 +134,15 @@ def generateRSS(items):
         'xmlns:atom': 'http://www.w3.org/2005/Atom'
     })
 
-def generateIndex(items, tags):
+def generatePrimaryIndex(items, tags):
     return wrap('html',[
         headerElement(),
         bodyElement('',
-            wrap('p','This is where I put my finest posts.')+
+            wrap('p','')+
+            wrap('center',[wrap('a', tag, {'href': f'../tags/{tag}.html'}) for tag in tags])+
             wrap('ul',[
                 wrap('li',[
-                    wrap('a', [item['title']], {'href': item['pagename']}),
+                    wrap('a', item['title'], {'href': item['pagename']}),
                     (' - ' + item['description']),
                     ' ',
                     wrap('span', [
@@ -150,7 +151,31 @@ def generateIndex(items, tags):
                         ', updated '+item['updated_at'].strftime('%b %d %Y') if item['created_at'] != item['updated_at'] else ''
                     ], {'class': 'post_metadata'})
                 ]) for item in sorted(items,key=itemgetter('created_at'),reverse=True) if item['published']
-        ]))
+            ])
+        )
+    ], {'lang': 'en-US'})
+    
+def generateTagIndex(items, tags, selected_tag):
+    return wrap('html',[
+        headerElement(),
+        bodyElement('',
+            wrap('p','')+
+            wrap('center',[
+                (wrap('b',tag) if tag == selected_tag else wrap('a', tag, {'href': f'../tags/{tag}.html'})) for tag in tags
+            ])+
+            wrap('ul',[
+                wrap('li',[
+                    wrap('a', item['title'], {'href': item['pagename']}),
+                    (' - ' + item['description']),
+                    ' ',
+                    wrap('span', [
+                        'published ',
+                        item['created_at'].strftime('%b %d %Y'),
+                        ', updated '+item['updated_at'].strftime('%b %d %Y') if item['created_at'] != item['updated_at'] else ''
+                    ], {'class': 'post_metadata'})
+                ]) for item in sorted(items,key=itemgetter('created_at'),reverse=True) if item['published'] and selected_tag in item['tags']
+            ])
+        )
     ], {'lang': 'en-US'})
 
 def clean_and_write(xml_string: str, path: str, kind: str):
@@ -172,7 +197,8 @@ for file in os.listdir('posts'):
         item = generatePost(filename, filepath)
         if item:
             items.append(item)
-        tags = tags + item['tags']
+        if item['published']:
+            tags = tags + item['tags']
 tags = sorted(set(tags))
 clean_and_write(
     generateRSS(items),
@@ -180,10 +206,16 @@ clean_and_write(
     'rss'
 )
 clean_and_write(
-    generateIndex(items, tags),
+    generatePrimaryIndex(items, tags),
     os.path.join(PAGE_DIRECTORY,'posts','index.html'),
     'webpage'
 )
+for tag in tags:
+    clean_and_write(
+        generateTagIndex(items, tags, tag),
+        os.path.join(PAGE_DIRECTORY,'tags',f'{tag}.html'),
+        'webpage'
+    )
 shutil.copy(
     os.path.join(os.getcwd(), 'default.css'),
     os.path.join(PAGE_DIRECTORY, 'default.css')
