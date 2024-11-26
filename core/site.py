@@ -2,6 +2,7 @@ from core.post import Post
 import os
 import io
 from xml.etree import ElementTree
+from modules.helpers import wrap
 import shutil
 
 
@@ -14,17 +15,6 @@ def clean_and_write(xml_string: str, path: str, kind: str):
         tree.write(path, method="xml")
     elif kind == "webpage":
         tree.write(path, method="html")
-
-
-def wrap(tag, contents, attributes=None):
-    attribute_string = "".join(f' {key}="{attributes[key]}"' for key in attributes) if attributes else ""
-    return "".join(
-        [
-            "<%s%s>" % (tag, attribute_string),
-            "".join(filter(lambda x: x is not None, contents)),
-            "</%s>" % tag,
-        ]
-    )
 
 
 def headerElement(title=None):
@@ -107,19 +97,7 @@ class Site:
                     },
                 ),
             ]
-            + [
-                wrap(
-                    "item",
-                    [
-                        wrap("title", post.title),
-                        wrap("link", f"{self.base_url}/posts/{post.pagename}"),
-                        wrap("description", post.description),
-                        wrap("guid", f"{self.base_url}/posts/{post.pagename}"),
-                    ],
-                )
-                for post in self.posts
-                if post.published
-            ],
+            + [post.rss_item(f"{self.base_url}/posts") for post in self.posts if post.published],
         )
         return wrap(
             "rss",

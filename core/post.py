@@ -1,5 +1,6 @@
 from xml.etree import ElementTree
 from datetime import date
+from modules.helpers import wrap
 import re
 
 
@@ -41,3 +42,14 @@ class Post:
         self.created_at = created_at
         self.updated_at = updated_at
         self.tags = tag_names
+
+    def rss_item(self, link_root):
+        return wrap(
+            "item",
+            [
+                wrap("title", self.title),
+                wrap("link", f"{link_root}/{self.pagename}"),
+                wrap("description", self.description),
+                wrap("guid", f"{link_root}/{self.pagename}"),
+            ],
+        )
