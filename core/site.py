@@ -76,7 +76,7 @@ class Site:
                 if post and post.published:
                     self.posts.append(post)
 
-        self.tags = sorted(set([tag for tag_list in map(lambda post: post.tags, self.posts) for tag in tag_list]))
+        self.tags = sorted(set([tag for tag_list in [post.tags for post in self.posts] for tag in tag_list]))
 
     def rss(self):
         channel_tag = wrap(
@@ -101,7 +101,7 @@ class Site:
         )
         return wrap(
             "rss",
-            [channel_tag],
+            channel_tag,
             {"version": "2.0", "xmlns:atom": "http://www.w3.org/2005/Atom"},
         )
 
