@@ -1,9 +1,6 @@
 from core.post import Post
 import os
 from operator import itemgetter
-
-with open(os.path.join(os.getcwd(), 'navigation-bar.html'), 'r') as file:
-    NAV_CONTENTS = file.read()
     
 def wrap(tag, contents, attributes=None):
     attribute_string = ''.join(f' {key}="{attributes[key]}"' for key in attributes) if attributes else ''
@@ -20,14 +17,6 @@ def headerElement(title = None):
         '<link rel="stylesheet" href="/default.css"/>',
         '<link rel="alternate" type="application/rss+xml" href="/rss.xml" title="RSS Feed"/>',
         f'<title>Wesley\'s Home Page{" - "+title if title else ""}</title>'
-    ])
-
-def bodyElement(title: str, content: str, created_at = None, updated_at = None):
-    return wrap('body', [
-        '<nav>',
-        NAV_CONTENTS,
-        '</nav>',
-        mainElement(title, content, created_at, updated_at)
     ])
 
 def mainElement(title: str, content: str, created_at = None, updated_at = None):
@@ -47,16 +36,19 @@ def mainElement(title: str, content: str, created_at = None, updated_at = None):
 class Site:
     def __init__(self, config):
         self.config = {}
-        self.config['post_xml_directory'] = config['post_xml_directory']
+        self.config['source_directory'] = config['source_directory']
         self.config['static_site_directory'] = config['static_site_directory']
         self.config['base_url'] = config['base_url']
         
+        with open(os.path.join(self.config['source_directory'], 'navigation-bar.html'), 'r') as file:
+            self.nav_contents = file.read()
+        
         posts = []
         tags = []
-        for file in os.listdir(self.config['post_xml_directory']):
+        for file in os.listdir(os.path.join(self.config['source_directory'],'posts')):
             filename = os.fsdecode(file)
             if filename.endswith('.xml'):
-                filepath = os.path.join(os.getcwd(),'posts',filename)
+                filepath = os.path.join(self.config['source_directory'],'posts',filename)
                 post = Post(filename, filepath)
                 if post and post.published:
                     posts.append(post)
@@ -91,7 +83,7 @@ class Site:
     def primaryIndex(self):
         return wrap('html',[
             headerElement(),
-            bodyElement('',
+            self.bodyElement('',
                 wrap('p','')+
                 wrap('center',[wrap('a', tag, {'href': f'../tags/{tag}'}) for tag in self.tags])+
                 wrap('ul',[
@@ -115,7 +107,7 @@ class Site:
     def tagIndex(self, selected_tag):
         return wrap('html',[
             headerElement(),
-            bodyElement('',
+            self.bodyElement('',
                 wrap('p','')+
                 wrap('center',[
                     (wrap('b',tag) if tag == selected_tag else wrap('a', tag, {'href': f'../{tag}'})) for tag in self.tags
@@ -134,3 +126,11 @@ class Site:
                 ])
             )
         ], {'lang': 'en-US'})
+
+    def bodyElement(self, title: str, content: str, created_at = None, updated_at = None):
+        return wrap('body', [
+            '<nav>',
+            self.nav_contents,
+            '</nav>',
+            mainElement(title, content, created_at, updated_at)
+        ])

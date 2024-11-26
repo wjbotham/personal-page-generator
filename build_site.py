@@ -43,6 +43,6 @@ for tag_name,tag_index in site.tagIndexes().items():
         'webpage'
     )
 shutil.copy(
-    os.path.join(os.getcwd(), 'default.css'),
+    os.path.join(config['source_directory'], 'default.css'),
     os.path.join(config['static_site_directory'], 'default.css')
 )

@@ -1,4 +1,4 @@
 ---
-post_xml_directory: C:\Users\wjbot\Projects\personal-page-generator\posts
+source_directory: C:\Users\wjbot\Projects\personal-page-source
 static_site_directory: C:\Users\wjbot\Projects\personal-page
 base_url: https://wajib.space
