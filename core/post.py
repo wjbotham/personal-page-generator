@@ -1,6 +1,6 @@
 from xml.etree import ElementTree
 from datetime import date
-from modules.helpers import wrap
+from modules.helpers import wrap,write
 import re
 
 
@@ -11,37 +11,32 @@ class Post:
         except ElementTree.ParseError as err:
             print(f"parse error in {filename}: {err}")
             return None
-        published = False
+        self.pagename = re.sub(r"\.xml$", "", filename)
+        self.published = False
+        self.description = ""
+        self.content = ""
         for child in source.getroot():
             if child.tag == "title":
-                title = child.text
+                self.title = child.text
             elif child.tag == "description":
-                description = child.text
+                self.description = child.text
             elif child.tag == "html_content":
-                content = ""
                 for subchild in child:
-                    content += ElementTree.tostring(subchild, encoding="unicode")
+                    self.content += ElementTree.tostring(subchild, encoding="unicode")
             elif child.tag == "published":
                 if child.text == "true":
-                    published = True
+                    self.published = True
             elif child.tag == "created_at":
                 year, month, day = map(int, child.text.split("-"))
-                created_at = date(year, month, day)
+                self.created_at = date(year, month, day)
             elif child.tag == "updated_at":
                 year, month, day = map(int, child.text.split("-"))
-                updated_at = date(year, month, day)
+                self.updated_at = date(year, month, day)
             elif child.tag == "tags":
-                tag_names = []
+                self.tags = []
                 for subchild in child:
                     if subchild.tag == "tag":
-                        tag_names += [subchild.text]
-        self.title = title
-        self.description = description
-        self.published = published
-        self.pagename = re.sub(r"\.xml$", "", filename)
-        self.created_at = created_at
-        self.updated_at = updated_at
-        self.tags = tag_names
+                        self.tags += [subchild.text]
 
     def rss_item(self, link_root):
         return wrap(
@@ -59,8 +54,7 @@ class Post:
             "li",
             [
                 wrap("a", self.title, {"href": f"/posts/{self.pagename}"}),
-                (" - " + self.description),
-                " ",
+                f" - {self.description} " if self.description else "",
                 wrap(
                     "span",
                     [

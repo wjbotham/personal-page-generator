@@ -1,20 +1,8 @@
 from core.post import Post
 import os
-import io
-from xml.etree import ElementTree
-from modules.helpers import wrap
+from modules.helpers import wrap, write
 import shutil
 
-
-def clean_and_write(xml_string: str, path: str, kind: str):
-    assert kind == "rss" or kind == "webpage"
-    tree = ElementTree.parse(io.StringIO(xml_string))
-    ElementTree.indent(tree.getroot())
-    if kind == "rss":
-        ElementTree.register_namespace("atom", "http://www.w3.org/2005/Atom")
-        tree.write(path, method="xml")
-    elif kind == "webpage":
-        tree.write(path, method="html")
 
 
 def headerElement(title=None):
@@ -141,12 +129,12 @@ class Site:
         )
 
     def generate_static_files(self):
-        clean_and_write(
+        write(
             self.rss(),
             os.path.join(self.static_site_directory, "rss.xml"),
             "rss",
         )
-        clean_and_write(
+        write(
             self.index(),
             os.path.join(self.static_site_directory, "posts", "index.html"),
             "webpage",
@@ -155,7 +143,21 @@ class Site:
             tag_directory = os.path.join(self.static_site_directory, "tags", tag_name)
             if not os.path.isdir(tag_directory):
                 os.mkdir(tag_directory)
-            clean_and_write(tag_index, os.path.join(tag_directory, "index.html"), "webpage")
+            write(tag_index, os.path.join(tag_directory, "index.html"), "webpage")
+        for post in self.posts:
+            if post.published:
+                post_directory = os.path.join(self.static_site_directory,'posts',post.pagename)
+                outfilepath = os.path.join(post_directory,'index.html')
+                if not os.path.isdir(post_directory):
+                    os.mkdir(post_directory)
+                write(
+                    wrap('html',[
+                        headerElement(post.title),
+                        self.bodyElement(post.title, post.content, post.created_at, post.updated_at)
+                    ], {'lang': 'en-US'}),
+                    os.path.join(post_directory,'index.html'),
+                    'webpage'
+                )
         shutil.copy(
             os.path.join(self.source_directory, "default.css"),
             os.path.join(self.static_site_directory, "default.css"),
