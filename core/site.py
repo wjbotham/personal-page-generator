@@ -40,7 +40,7 @@ def mainElement(title: str, content: str, created_at = None, updated_at = None):
             'published ',
             created_at.strftime('%b %d %Y')
         ], {'class': 'post_metadata'}) if created_at else '',
-        '<br/>'+wrap('span', [
+            '<br/>'+wrap('span', [
             'updated ',
             updated_at.strftime('%b %d %Y'),
         ], {'class': 'post_metadata'}) if (updated_at and created_at != updated_at) else ''
@@ -93,41 +93,20 @@ class Site:
             'xmlns:atom': 'http://www.w3.org/2005/Atom'
         })
 
-    def primaryIndex(self):
-        return wrap('html',[
-            headerElement(),
-            self.bodyElement('',
-                wrap('p','')+
-                wrap('center',[wrap('a', tag, {'href': f'../tags/{tag}'}) for tag in self.tags])+
-                wrap('ul',[
-                    wrap('li',[
-                        wrap('a', post.title, {'href': post.pagename}),
-                        (' - ' + post.description),
-                        ' ',
-                        wrap('span', [
-                            'published ',
-                            post.created_at.strftime('%b %d %Y'),
-                            ', updated '+post.updated_at.strftime('%b %d %Y') if post.created_at != post.updated_at else ''
-                        ], {'class': 'post_metadata'})
-                    ]) for post in sorted(self.posts,key=lambda post: post.created_at,reverse=True) if post.published
-                ])
-            )
-        ], {'lang': 'en-US'})
-    
     def tagIndexes(self):
-        return { selected_tag: self.tagIndex(selected_tag) for selected_tag in self.tags }
-    
-    def tagIndex(self, selected_tag):
+        return { selected_tag: self.index(selected_tag) for selected_tag in self.tags }
+
+    def index(self, selected_tag=None):
         return wrap('html',[
-            headerElement(),
+            headerElement(selected_tag or 'Posts'),
             self.bodyElement('',
                 wrap('p','')+
                 wrap('center',[
-                    (wrap('b',tag) if tag == selected_tag else wrap('a', tag, {'href': f'../{tag}'})) for tag in self.tags
+                    (wrap('b',tag) if tag == selected_tag else wrap('a', tag, {'href': f'/tags/{tag}'})) for tag in self.tags
                 ])+
                 wrap('ul',[
                     wrap('li',[
-                        wrap('a', post.title, {'href': f'../posts/{post.pagename}'}),
+                        wrap('a', post.title, {'href': f'/posts/{post.pagename}'}),
                         (' - ' + post.description),
                         ' ',
                         wrap('span', [
@@ -135,7 +114,7 @@ class Site:
                             post.created_at.strftime('%b %d %Y'),
                             ', updated '+post.updated_at.strftime('%b %d %Y') if post.created_at != post.updated_at else ''
                         ], {'class': 'post_metadata'})
-                    ]) for post in sorted(self.posts,key=lambda post: post.created_at,reverse=True) if post.published and selected_tag in post.tags
+                    ]) for post in sorted(self.posts,key=lambda post: post.created_at,reverse=True) if post.published and (selected_tag in post.tags or not selected_tag)
                 ])
             )
         ], {'lang': 'en-US'})
@@ -155,7 +134,7 @@ class Site:
             'rss'
         )
         clean_and_write(
-            self.primaryIndex(),
+            self.index(),
             os.path.join(self.config['static_site_directory'],'posts','index.html'),
             'webpage'
         )
