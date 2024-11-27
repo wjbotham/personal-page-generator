@@ -23,22 +23,8 @@ def mainElement(title: str, content: str, created_at=None, updated_at=None):
         [
             ("<h2>%s</h2>" % title) if title else "",
             content,
-            wrap(
-                "span",
-                ["published ", created_at.strftime("%b %d %Y")],
-                {"class": "post_metadata"},
-            )
-            if created_at
-            else "",
-            "<br/>"
-            + wrap(
-                "span",
-                [
-                    "updated ",
-                    updated_at.strftime("%b %d %Y"),
-                ],
-                {"class": "post_metadata"},
-            )
+            wrap("span", f"published {created_at.strftime("%b %d %Y")}", {"class": "post_metadata"}) if created_at else "",
+            "<br/>" + wrap("span", f"updated {updated_at.strftime("%b %d %Y")}", {"class": "post_metadata"})
             if (updated_at and created_at != updated_at)
             else "",
         ],
