@@ -7,7 +7,7 @@ def wrap(tag, contents, attributes=None):
     return "".join(
         [
             "<%s%s>" % (tag, attribute_string),
-            "".join(filter(lambda x: x is not None, contents)),
+            "".join(filter(lambda x: x is not None, contents or [])),
             "</%s>" % tag,
         ]
     )
