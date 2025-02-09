@@ -19,6 +19,7 @@ def write(xml_string: str, path: str, kind: str):
     ElementTree.indent(tree.getroot())
     if kind == "rss":
         ElementTree.register_namespace("atom", "http://www.w3.org/2005/Atom")
+        ElementTree.register_namespace("content", "http://purl.org/rss/1.0/modules/content/")
         tree.write(path, method="xml")
     elif kind == "webpage":
         tree.write(path, method="html")

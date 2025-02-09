@@ -75,7 +75,7 @@ class Site:
         return wrap(
             "rss",
             channel_tag,
-            {"version": "2.0", "xmlns:atom": "http://www.w3.org/2005/Atom"},
+            {"version": "2.0", "xmlns:atom": "http://www.w3.org/2005/Atom", "xmlns:content": "http://purl.org/rss/1.0/modules/content/"},
         )
 
     def tagIndexes(self):

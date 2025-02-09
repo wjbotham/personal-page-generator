@@ -1,6 +1,7 @@
 from xml.etree import ElementTree
 from datetime import date
 from modules.helpers import wrap
+from html import escape
 import re
 
 
@@ -45,6 +46,7 @@ class Post:
                 wrap("title", self.title),
                 wrap("link", f"{link_root}/posts/{self.pagename}"),
                 wrap("description", self.description),
+                wrap("content:encoded", escape(self.content)),
                 wrap("guid", f"{link_root}/posts/{self.pagename}"),
             ],
         )
