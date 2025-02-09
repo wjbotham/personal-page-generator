@@ -12,7 +12,7 @@ def headerElement(title=None):
             '<script src="https://code.jquery.com/jquery-3.6.1.js"></script>',
             '<link rel="stylesheet" href="/default.css"/>',
             '<link rel="alternate" type="application/rss+xml" href="/rss.xml" title="RSS Feed"/>',
-            f"<title>Wesley's Home Page{' - ' + title if title else ''}</title>",
+            f"<title>wajib.space{' - ' + title if title else ''}</title>",
         ],
     )
 
@@ -55,9 +55,9 @@ class Site:
         channel_tag = wrap(
             "channel",
             [
-                "<title>Wesley's Home Page</title>",
+                "<title>wajib.space</title>",
                 f"<link>{self.base_url}</link>",
-                "<description>My personal page where I post things I don't want anyone to see.</description>",
+                "<description>My personal site where I post things I don't want anyone to see.</description>",
                 "<language>en-US</language>",
                 "<docs>https://www.rssboard.org/rss-specification</docs>",
                 wrap(
